@@ -6,16 +6,13 @@
     <title>Simracing Kalender | v.1.0.2</title>
     <style>
         body{margin:0;font-family:Arial, sans-serif;background:#0b0b0b;color:white;overflow-x:hidden; user-select: none;} 
-        /* Header auf Center gesetzt */
         header{display:flex;justify-content:center;align-items:center;padding:20px;font-size:28px;font-weight:bold;color:#ff7b00;text-shadow:0 0 15px #ff7b00;border-bottom: 1px solid #222; position: relative; text-align: center;}
         .version-tag{font-size: 12px; vertical-align: middle; opacity: 0.5; margin-left: 8px; font-weight: normal; color: #ddd;}
-        
-        /* Hamburger Button absolut rechts positioniert */
         #openBtn { position: absolute; right: 20px; }
 
-        /* WARTUNGS-BOX STYLE - AKTUELL AUSGEBLENDET */
+        /* WARTUNGS-BOX - AKTIVIERT */
         .maintenance-box {
-            display: none; /* Hier auf 'flex' stellen, um sie wieder anzuzeigen */
+            display: flex; 
             background: linear-gradient(45deg, #ffcc00, #ff7b00);
             color: black;
             padding: 15px;
@@ -63,7 +60,6 @@
         .liveEvent{border:2px solid #0d6efd; animation:livePulse 1.5s infinite;}
         #overlay {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999;}
 
-        /* PASSWORT MODAL STYLE */
         #pwdModal {
             display:none; 
             position:fixed; 
@@ -104,8 +100,8 @@
     <div class="maintenance-content">
         <div class="maintenance-title">Geplante Wartungsarbeiten</div>
         <div class="maintenance-text">
-            2. BUGFIX, <b>25.03.2026 ab 16:00 Uhr</b>.<br>
-            <b>Grund:</b> Fehlerbehebungen & Sicherheitsüberprüfung.
+            Nächste Wartungsarbeiten am: <b>18.04.2026 um 15:30 Uhr</b>.<br>
+            <b>Update:</b> v1.0.3 - Systemoptimierung/Verbesserung 
         </div>
     </div>
 </div>
