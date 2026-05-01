@@ -1,334 +1,115 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Simracing Kalender (Beta)</title>
-<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-<style>
-body{margin:0;background:#0b0b0b;color:#fff;font-family:'Exo 2';}
-header{padding:20px;text-align:center;font-family:'Orbitron';font-size:28px;color:#ff7b00;}
-.beta-badge{font-size:12px;background:#ff7b00;color:#000;padding:2px 8px;border-radius:4px;vertical-align:middle;margin-left:10px;font-weight:900;}
-#start-container{display:flex; flex-direction:column; max-width:1200px; margin:auto; padding:20px;}
-#teamSelection{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px; flex-grow:1;}
-.team-card{background:#151515;border:2px solid #ff7b00;border-radius:10px;padding:25px;text-align:center;cursor:pointer;transition:.2s;display:flex;flex-direction:column;align-items:center;}
-.team-card:hover{transform:scale(1.05);}
-.team-card img{width:120px;height:120px;object-fit:contain;margin-bottom:10px;background:#111;border-radius:8px;border:2px solid #ff7b00;}
-.team-name{font-family:'Orbitron';margin-top:10px;}
-.main-wrapper{display:none;max-width:1000px;margin:auto;padding:20px;}
-.event{background:#151515;border-left:5px solid #ff7b00;margin:10px 0;padding:15px;border-radius:6px;cursor:pointer;transition:0.2s;}
-.event:hover{background:#1a1a1a;}
-.event.live{border-left:5px solid #00aaff;box-shadow:0 0 20px #00aaff;}
-.event.cancelled{opacity:0.5;border-left:5px solid #ff0000;}
-.event-title{font-size:18px;font-family:'Orbitron';color:#ff7b00;margin-bottom:8px;}
-.event-row{display:block;margin:6px 0;}
-.status-badge{padding:4px 10px;border-radius:5px;font-size:12px;font-weight:bold;}
-.status-ok{background:#1f7a1f;color:#fff;}
-.status-unclear{background:#b38b00;color:#000;}
-.status-cancelled{background:#b30000;color:#fff;}
-.status-live{background:#00aaff;color:#fff;}
-.countdown-text{font-family:'Orbitron';font-size:13px;color:#00aaff;margin-bottom:5px;}
-.stream-link{display:inline-block;margin-top:10px;color:#00aaff;text-decoration:none;border:1px solid #00aaff;padding:5px 10px;border-radius:4px;transition:0.3s;}
-.stream-link:hover{background:#00aaff;color:#fff;}
-button{background:#ff7b00;border:none;padding:10px;cursor:pointer;font-family:'Orbitron';margin-top:5px;color:#000;font-weight:bold;}
-#hamburger{position:fixed;top:15px;right:15px;font-size:28px;cursor:pointer;color:#ff7b00;display:none;z-index:999;}
-#sideMenu{position:fixed;top:0;right:-300px;width:260px;height:100%;background:#111;border-left:2px solid #ff7b00;padding:20px;transition:0.3s;z-index:998;overflow-y:auto;}
-#sideMenu.open{right:0;}
-.driver-container{display:flex; align-items:center; margin:5px 0;}
-.driver{flex-grow:1; padding:8px;background:#1a1a1a;cursor:pointer;border-radius:5px 0 0 5px;transition:0.2s;}
-.driver.active{background:#ff7b00;color:#000;font-weight:bold;}
-.delete-driver-btn{background:#b30000; color:#fff; padding:8px 12px; border-radius:0 5px 5px 0; font-family:'Arial'; cursor:pointer;}
-#overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:1000;}
-#pwdModal,#eventModal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#111;padding:25px;border:2px solid #ff7b00;width:380px;z-index:1001;border-radius:10px;max-height:90vh;overflow-y:auto;}
-.modal-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:15px;}
-.modal-grid label{font-size:12px;color:#ff7b00;margin-bottom:-5px;font-family:'Orbitron';}
-.modal-grid input,.modal-grid select{background:#222;border:1px solid #444;color:#fff;padding:8px;border-radius:4px;font-family:'Exo 2';}
-#e_drivers{height:100px;}
-#adminDriverSection{display:none;border-bottom:1px solid #ff7b00;padding-bottom:10px;margin-bottom:10px;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wartungsarbeiten | iRacing Kalender</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #0b0b0b;
+            color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+        }
 
-/* Patchlog Layout Optimierungen */
-.patchlog-start{width: 320px; background:#151515; border:2px solid #333; padding:20px; border-radius:10px; margin-bottom: 20px;}
-details summary { cursor: pointer; font-family: 'Orbitron'; color: #ff7b00; font-size: 18px; outline: none; list-style: none; }
-details summary::-webkit-details-marker { display: none; }
-.patch-content { margin-top: 15px; }
-.patch-item{font-size:14px; margin-bottom:15px; color:#ccc; border-bottom: 1px solid #222; padding-bottom: 10px;}
-.patch-item:last-child{border:none;}
-.patch-version{color:#ff7b00; font-weight:bold; font-family:'Orbitron'; font-size:13px; margin-bottom:5px; display: block;}
+        .maintenance-container {
+            padding: 40px;
+            border: 1px solid #ff7b00;
+            background: #111;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(255, 123, 0, 0.2);
+            max-width: 500px;
+            width: 90%;
+        }
 
-@media (min-width: 900px) {
-    #start-container { flex-direction: row; align-items: flex-start; gap: 40px; }
-}
-</style>
+        .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: wrench 2.5s infinite ease-in-out;
+        }
+
+        @keyframes wrench {
+            0% { transform: rotate(0deg); }
+            20% { transform: rotate(-15deg); }
+            40% { transform: rotate(15deg); }
+            60% { transform: rotate(-15deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        h1 {
+            color: #ff7b00;
+            font-size: 32px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px #ff7b00;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #ddd;
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            background: #dc3545;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #555;
+        }
+
+        .race-line {
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #ff7b00, transparent);
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
 
-<header>🏁 Simracing Kalender <span class="beta-badge">BETA v2.0.0</span></header>
-<div id="hamburger" onclick="toggleMenu()">☰</div>
+<div class="maintenance-container">
+    <div class="icon">🔧</div>
+    <h1>Boxenstopp</h1>
+    <div class="status-badge">Wartungsarbeiten aktiv</div>
+    
+    <p>
+        Wir schrauben gerade am Setup des Kalenders.<br>
+        In Kürze sind wir wieder auf der Strecke für euch da!
+    </p>
 
-<div id="sideMenu">
- <h3>Fahrer</h3>
- <div id="adminDriverSection">
-    <label style="font-size: 10px; color: #ff7b00; font-family: 'Orbitron';">ADMIN BEREICH</label>
-    <input id="newDriverName" placeholder="Neuer Fahrer Name" style="width:100%; box-sizing:border-box; margin-bottom:5px; padding:5px; background: #222; color: #fff; border: 1px solid #444;">
-    <button onclick="addDriver()" style="width:100%">+ Fahrer hinzufügen</button>
- </div>
- <button onclick="resetDriverFilter()" style="width:100%">Alle Fahrer anzeigen</button>
- <div id="driverList"></div>
-</div>
+    <div class="race-line"></div>
 
-<!-- Startansicht mit Patchlog links und Teams daneben -->
-<div id="start-container">
-    <div id="patchlog-container" class="patchlog-start">
-        <details>
-            <summary>📦 Patchlog Details</summary>
-            <div class="patch-content">
-                <div class="patch-item">
-                    <span class="patch-version">VERSION 2.0.0</span>
-                    • <b>Admin-Zentrale:</b> Fahrer-Löschfunktion implementiert.<br>
-                    • <b>UI-Redesign:</b> Patchlog auf Startseite verschoben und einklappbar gemacht.<br>
-                    • <b>Beta-Phase:</b> Versions-Meilenstein erreicht.
-                </div>
-            </div>
-        </details>
+    <div class="footer">
+        🏁 iRacing Kalender Maintenance Mode
     </div>
-    <div id="teamSelection"></div>
 </div>
 
-<div class="main-wrapper">
- <button onclick="back()">⬅ zurück</button>
- <button id="addEventBtn" onclick="openEventModal()" style="display:none;">+ Termin erstellen</button>
-
- <h2 id="teamTitle"></h2>
-
- <select id="monthFilter" style="padding:10px; background:#151515; color:#fff; border:1px solid #ff7b00; font-family:'Orbitron';">
-  <option value="all">Alle Monate</option>
-  <option value="0">Januar</option><option value="1">Februar</option><option value="2">März</option><option value="3">April</option><option value="4">Mai</option><option value="5">Juni</option><option value="6">Juli</option><option value="7">August</option><option value="8">September</option><option value="9">Oktober</option><option value="10">November</option><option value="11">Dezember</option>
- </select>
-
- <div id="calendar"></div>
-</div>
-
-<div id="overlay" onclick="closeAll()"></div>
-
-<div id="pwdModal">
- <h3 id="pwdTitle"></h3>
- <p style="font-size: 11px; color: #aaa;">Gib dein Team-Passwort ein.<br>(Admin-Passwort für Fahrer-Verwaltung nutzen)</p>
- <input type="password" id="pwd" placeholder="Passwort..." style="width:100%; padding:10px; box-sizing:border-box; margin-bottom: 10px; background: #222; color: #fff; border: 1px solid #ff7b00;">
- <button onclick="login()" style="width:100%;">Login</button>
-</div>
-
-<div id="eventModal">
- <h3 id="modalHeadline" style="font-family:'Orbitron'; color:#ff7b00; margin:0;">Neues Event</h3>
- <div class="modal-grid">
-  <label>Titel</label><input id="e_title" placeholder="z.B. 24h Nürburgring">
-  <label>Datum</label><input id="e_date" type="date">
-  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-    <div><label>Start</label><br><input id="e_start" type="time" style="width:100%;"></div>
-    <div><label>Ende</label><br><input id="e_end" type="time" style="width:100%;"></div>
-  </div>
-  <label>Strecke</label><input id="e_track" placeholder="Nordschleife">
-  <label>Auto</label><input id="e_vehicle" placeholder="GT3">
-  <label>Fahrer auswählen (Strg halten)</label><select id="e_drivers" multiple></select>
-  <label>Stream Link</label><input id="e_stream" placeholder="https://youtube.com/...">
-  <label>Status</label>
-  <select id="e_status">
-   <option value="ok">Findet statt</option>
-   <option value="unclear">Unklar</option>
-   <option value="cancelled">Entfällt</option>
-  </select>
- </div>
- <button onclick="saveEvent()" style="width:100%; margin-top:20px;">Event Speichern</button>
- <button id="deleteBtn" onclick="deleteEvent()" style="width:100%; background:#b30000; color:#fff; display:none;">Termin löschen</button>
- <button onclick="closeAll()" style="width:100%; background:#444; color:#fff;">Abbrechen</button>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const db = supabase.createClient("https://hbuppukuizrnzrhwvfou.supabase.co","sb_publishable_atazSTKWDQ5VMKQqHxO0BA_GoPQzPDX");
-let teams=[],events=[],drivers=[],currentTeam=null,selectedDriver=null,selectedMonth="all",editId=null,isAdmin=false;
-
-async function init(){
- await loadTeams(); await loadEvents(); await loadDrivers();
- document.getElementById("monthFilter").onchange=(e)=>{selectedMonth=e.target.value; renderEvents();};
- setInterval(renderEvents, 1000); 
-}
-
-async function loadTeams(){ const {data}=await db.from('teams').select('*'); teams=data||[]; renderTeams(); }
-
-function renderTeams(){
- const c=document.getElementById("teamSelection");
- c.innerHTML="";
- teams.forEach(t=>{
-  let logoURL=null;
-  if(t.logo){ const {data}=db.storage.from('team-logos').getPublicUrl(t.logo); logoURL=data.publicUrl; }
-  const div=document.createElement("div"); div.className="team-card";
-  div.innerHTML=`${logoURL ? `<img src="${logoURL}">` : ""}<div class="team-name">${t.name}</div>`;
-  div.onclick=()=>openLogin(t); c.appendChild(div);
- });
-}
-
-function openLogin(t){ currentTeam=t; document.getElementById("pwdTitle").innerText=t.name; document.getElementById("pwd").value = ""; document.getElementById("pwdModal").style.display="block"; document.getElementById("overlay").style.display="block"; }
-
-async function login(){
- const p = document.getElementById("pwd").value;
- const {data}=await db.from('teams').select('*').eq('name',currentTeam.name).single();
- if(data){
-    if(p === data.password) { isAdmin = false; completeLogin(); }
-    else if (data.admin_password && p === data.admin_password) { isAdmin = true; completeLogin(); }
-    else { alert("Falsches Passwort"); }
- }
-}
-
-function completeLogin() {
-    closeAll(); openMain();
-    document.getElementById("adminDriverSection").style.display = isAdmin ? "block" : "none";
-    document.getElementById("addEventBtn").style.display = "inline-block";
-}
-
-function openMain(){
- document.getElementById("start-container").style.display="none";
- document.querySelector(".main-wrapper").style.display="block";
- document.getElementById("hamburger").style.display="block";
- document.getElementById("teamTitle").innerText=currentTeam.name;
- renderEvents(); renderDrivers();
-}
-
-function back(){ location.reload(); }
-
-async function loadEvents(){ const {data}=await db.from('events').select('*'); events=data||[]; }
-
-function getCountdown(targetDate) {
-    const now = new Date().getTime(); const diff = targetDate - now;
-    if (diff <= 0) return null;
-    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const s = Math.floor((diff % (1000 * 60)) / 1000);
-    return (d > 0 ? d + "d " : "") + h + "h " + m + "m " + s + "s";
-}
-
-function renderEvents(){
- const c=document.getElementById("calendar"); if(!c) return; c.innerHTML="";
- events.filter(e=>{
-  if(e.team!==currentTeam.name) return false;
-  if(selectedDriver && !(e.drivers||"").includes(selectedDriver)) return false;
-  if(selectedMonth!=="all"){ const d=new Date(e.date); if(d.getMonth()!=selectedMonth) return false; }
-  return true;
- }).sort((a,b) => new Date(a.date+" "+a.start) - new Date(b.date+" "+b.start)).forEach(e=>{
-  const now=new Date(); const start=new Date(e.date+" "+e.start); const end=new Date(e.date+" "+e.end);
-  const isLive = now >= start && now <= end; const isPast = now > end;
-  let label = ""; let badgeClass = "";
-  if (e.status === "cancelled") { label = "ENTFÄLLT"; badgeClass = "status-cancelled"; }
-  else if (isLive) { label = "LIVE"; badgeClass = "status-live"; }
-  else if (isPast) { label = "Beendet"; badgeClass = "status-ok"; }
-  else { label = e.status === "ok" ? "Findet statt" : "Unklar"; badgeClass = e.status === "ok" ? "status-ok" : "status-unclear"; }
-  const div = document.createElement("div"); div.className = `event ${isLive?"live":""} ${e.status==="cancelled"?"cancelled":""}`;
-  div.onclick = () => openEventModal(e);
-  div.innerHTML = `
-    <div class="event-title">${e.title}</div><div class="countdown-text">${(isPast && e.status!=="cancelled") ? "" : (isLive ? "Endet in: "+getCountdown(end) : "Startet in: "+getCountdown(start))}</div>
-    <div class="event-row"><span class="status-badge ${badgeClass}">${label}</span></div>
-    <div class="event-row">📅 ${e.date} | 🕒 ${e.start} - ${e.end}</div>
-    <div class="event-row">📍 ${e.track} | 🏎️ ${e.vehicle}</div>
-    <div class="event-row">👥 ${e.drivers || ""}</div>
-    ${e.stream ? `<a href="${e.stream}" target="_blank" class="stream-link" onclick="event.stopPropagation()">📺 Zum Stream</a>` : ""}
-  `;
-  c.appendChild(div);
- });
-}
-
-async function addDriver(){
- if(!isAdmin) return;
- const name=document.getElementById("newDriverName").value.trim();
- if(!name || !currentTeam) return;
- await db.from('drivers').insert({ name:name, team:currentTeam.name });
- document.getElementById("newDriverName").value=""; await loadDrivers();
-}
-
-async function deleteDriver(id, name) {
-    if(!isAdmin) return;
-    if(!confirm(`Fahrer "${name}" wirklich löschen?`)) return;
-    const { error } = await db.from('drivers').delete().eq('id', id);
-    if(error) alert("Fehler beim Löschen"); else await loadDrivers();
-}
-
-async function loadDrivers(){ const {data}=await db.from('drivers').select('*'); drivers=data||[]; renderDrivers(); updateDriverDropdown(); }
-
-function renderDrivers(){
- const c=document.getElementById("driverList"); if(!c || !currentTeam) return; c.innerHTML="";
- drivers.filter(d=>d.team===currentTeam.name).forEach(d=>{
-  const container = document.createElement("div"); container.className = "driver-container";
-  const div = document.createElement("div"); div.className = `driver ${selectedDriver === d.name ? 'active' : ''}`;
-  div.innerText = d.name; div.onclick = () => selectDriver(d.name);
-  container.appendChild(div);
-  if(isAdmin) {
-      const delBtn = document.createElement("div"); delBtn.className = "delete-driver-btn";
-      delBtn.innerText = "X"; delBtn.onclick = (e) => { e.stopPropagation(); deleteDriver(d.id, d.name); };
-      container.appendChild(delBtn);
-  }
-  c.appendChild(container);
- });
-}
-
-function updateDriverDropdown() {
-    const select = document.getElementById("e_drivers"); if(!select || !currentTeam) return; select.innerHTML = "";
-    drivers.filter(d => d.team === currentTeam.name).forEach(d => {
-        const opt = document.createElement("option"); opt.value = d.name; opt.innerText = d.name; select.appendChild(opt);
-    });
-}
-
-function selectDriver(name){ selectedDriver = (selectedDriver === name) ? null : name; renderDrivers(); renderEvents(); }
-function resetDriverFilter(){ selectedDriver=null; renderDrivers(); renderEvents(); }
-function toggleMenu(){ document.getElementById("sideMenu").classList.toggle("open"); }
-
-function openEventModal(eventObj = null) {
-    updateDriverDropdown(); const driverSelect = document.getElementById("e_drivers");
-    if(eventObj && eventObj.id) {
-        editId = eventObj.id; document.getElementById("modalHeadline").innerText = "Event bearbeiten";
-        document.getElementById("e_title").value = eventObj.title; document.getElementById("e_date").value = eventObj.date;
-        document.getElementById("e_start").value = eventObj.start; document.getElementById("e_end").value = eventObj.end;
-        document.getElementById("e_track").value = eventObj.track; document.getElementById("e_vehicle").value = eventObj.vehicle;
-        document.getElementById("e_stream").value = eventObj.stream; document.getElementById("e_status").value = eventObj.status;
-        const eventDrivers = (eventObj.drivers || "").split(", ");
-        Array.from(driverSelect.options).forEach(opt => { opt.selected = eventDrivers.includes(opt.value); });
-        document.getElementById("deleteBtn").style.display = "block";
-    } else {
-        editId = null; document.getElementById("modalHeadline").innerText = "Neues Event";
-        document.getElementById("e_title").value = ""; document.getElementById("e_date").value = "";
-        document.getElementById("e_start").value = ""; document.getElementById("e_end").value = "";
-        document.getElementById("e_track").value = ""; document.getElementById("e_vehicle").value = "";
-        document.getElementById("e_stream").value = ""; document.getElementById("e_status").value = "ok";
-        Array.from(driverSelect.options).forEach(opt => opt.selected = false);
-        document.getElementById("deleteBtn").style.display = "none";
-    }
-    document.getElementById("eventModal").style.display="block"; document.getElementById("overlay").style.display="block";
-}
-
-function closeAll(){ document.getElementById("overlay").style.display="none"; document.getElementById("pwdModal").style.display="none"; document.getElementById("eventModal").style.display="none"; document.getElementById("sideMenu").classList.remove("open"); }
-
-async function saveEvent(){
-    const driverSelect = document.getElementById("e_drivers");
-    const selectedDrivers = Array.from(driverSelect.selectedOptions).map(opt => opt.value).join(", ");
-    const eventData = {
-        title: document.getElementById("e_title").value, date: document.getElementById("e_date").value,
-        start: document.getElementById("e_start").value, end: document.getElementById("e_end").value,
-        track: document.getElementById("e_track").value, vehicle: document.getElementById("e_vehicle").value,
-        drivers: selectedDrivers, stream: document.getElementById("e_stream").value,
-        status: document.getElementById("e_status").value, team: currentTeam.name
-    };
-    if(!eventData.title || !eventData.date) return alert("Titel und Datum fehlen!");
-    let res = editId ? await db.from('events').update(eventData).eq('id', editId) : await db.from('events').insert(eventData);
-    if(res.error) alert("Fehler beim Speichern");
-    else { closeAll(); await loadEvents(); renderEvents(); }
-}
-
-async function deleteEvent() {
-    if(!editId) return; 
-    if(!confirm("Möchtest du dieses Event wirklich löschen?")) return;
-    const { error } = await db.from('events').delete().eq('id', editId);
-    if(error) alert("Fehler beim Löschen"); else { closeAll(); await loadEvents(); renderEvents(); }
-}
-
-window.onload=init;
-</script>
 </body>
 </html>
