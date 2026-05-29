@@ -165,7 +165,22 @@ canvas{
     border-radius:10px;
 }
 
+/* =========================
+   SUPABASE (NUR HINZUGEFÜGT)
+========================= */
 </style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const SUPABASE_URL = "https://upbxznmaviomljfejlyw.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_UQcsVD61MLTZBZ15q7jB1Q_b1UF9IVJ";
+
+const supabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
+</script>
 
 </head>
 
@@ -314,6 +329,63 @@ function updateClockAndTotals() {
         totalUsersSum += districts[id].users;
     }
     document.getElementById("totalUsersDisplay").innerText = "Gesamt-Nutzer: " + Math.round(totalUsersSum).toLocaleString("de-DE");
+}
+
+// Counter für Datenbank-Drosselung (Speichern alle 5 Sekunden)
+let dbUpdateCounter = 0;
+
+// Async Funktion zur Speicherung in Supabase
+async function saveToSupabase() {
+    const isoTimestamp = new Date().toISOString();
+
+    for (let id in districts) {
+        let db = districts[id];
+        let numId = parseInt(id);
+
+        let roundedUsers = Math.round(db.users);
+        let roundedCpu = Math.round(db.cpu);
+        let roundedTemp = Math.round(db.temp);
+        let roundedFan = Math.round(db.fan);
+        let roundedDamage = Math.round(db.damage);
+
+        // 1. Speichern in Tabelle 'district'
+        try {
+            await supabase
+                .from('district')
+                .upsert({
+                    id: numId,
+                    district: "Bezirk " + id,
+                    data: {
+                        users: roundedUsers,
+                        cpu: roundedCpu,
+                        temp: roundedTemp,
+                        fan: roundedFan,
+                        damage: roundedDamage,
+                        systemOn: db.systemOn
+                    },
+                    updated_at: isoTimestamp
+                });
+        } catch (error) {
+            console.error("Fehler beim Speichern in Tabelle 'district':", error);
+        }
+
+        // 2. Speichern in Tabelle 'districts'
+        try {
+            await supabase
+                .from('districts')
+                .upsert({
+                    id: numId,
+                    users: roundedUsers,
+                    cpu: roundedCpu,
+                    temp: roundedTemp,
+                    fan: roundedFan,
+                    damage: roundedDamage,
+                    updated_at: isoTimestamp
+                });
+        } catch (error) {
+            console.error("Fehler beim Speichern in Tabelle 'districts':", error);
+        }
+    }
 }
 
 // ====================================
@@ -714,6 +786,14 @@ function updateSystem(){
         drawChart("tempChart_" + id, db.tempHistory, false, 120);
         drawChart("fanChart_" + id, db.fanHistory, false, 100);
         drawChart("damageChart_" + id, db.damageHistory, false, 100);
+    }
+
+    // Erhöhe den globalen Interval-Counter
+    dbUpdateCounter++;
+    // Führe alle 5 Sekunden das Supabase-Update aus
+    if (dbUpdateCounter >= 5) {
+        saveToSupabase();
+        dbUpdateCounter = 0;
     }
 }
 
