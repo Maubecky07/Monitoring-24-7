@@ -165,9 +165,6 @@ canvas{
     border-radius:10px;
 }
 
-/* =========================
-   SUPABASE (NUR HINZUGEFÜGT)
-========================= */
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -176,10 +173,13 @@ canvas{
 const SUPABASE_URL = "https://upbxznmaviomljfejlyw.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_UQcsVD61MLTZBZ15q7jB1Q_b1UF9IVJ";
 
-const supabase = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-);
+// HIER KORRIGIERT: Holt die createClient-Methode direkt aus dem globalen CDN-Objekt,
+// bevor die lokale 'supabase'-Variable definiert wird. Das verhindert den Typ-Fehler.
+const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+if (!supabase) {
+    console.error("Supabase SDK konnte nicht geladen werden!");
+}
 </script>
 
 </head>
@@ -296,7 +296,11 @@ function createDistrictObject(maxUsersLimit) {
 function togglePower(id){
     let db = districts[id];
     db.systemOn = !db.systemOn;
+    updatePowerUI(id);
+}
 
+function updatePowerUI(id) {
+    let db = districts[id];
     let power = document.getElementById("powerState_" + id);
 
     if(db.systemOn){
@@ -331,12 +335,63 @@ function updateClockAndTotals() {
     document.getElementById("totalUsersDisplay").innerText = "Gesamt-Nutzer: " + Math.round(totalUsersSum).toLocaleString("de-DE");
 }
 
-// Counter für Datenbank-Drosselung (Speichern alle 5 Sekunden)
+// ====================================
+// SUPABASE: LADEN UND SPEICHERN
+// ====================================
+
 let dbUpdateCounter = 0;
 
-// Async Funktion zur Speicherung in Supabase
+async function loadFromSupabase() {
+    if (!supabase) return;
+    try {
+        console.log("Versuche Daten aus Supabase zu laden...");
+        const { data, error } = await supabase.from('districts').select('*');
+        
+        if (error) {
+            console.error("Fehler beim Laden aus Tabelle 'districts':", error);
+            return;
+        }
+
+        if (data && data.length > 0) {
+            data.forEach(row => {
+                let idStr = row.id.toString();
+                if (districts[idStr]) {
+                    districts[idStr].users = row.users;
+                    districts[idStr].cpu = row.cpu;
+                    districts[idStr].temp = row.temp;
+                    districts[idStr].fan = row.fan;
+                    districts[idStr].damage = row.damage;
+                    districts[idStr].targetUsers = row.users;
+                    districts[idStr].targetCpu = row.cpu;
+                }
+            });
+            
+            // Versuche auch den Status aus der Tabelle 'district' zu laden
+            const { data: districtData } = await supabase.from('district').select('*');
+            if (districtData) {
+                districtData.forEach(row => {
+                    let idStr = row.id.toString();
+                    if (districts[idStr] && row.data && typeof row.data.systemOn !== 'undefined') {
+                        districts[idStr].systemOn = row.data.systemOn;
+                        updatePowerUI(idStr);
+                    }
+                });
+            }
+            
+            updateClockAndTotals();
+            console.log("Daten erfolgreich aus Supabase geladen.");
+        } else {
+            console.log("Keine alten Daten gefunden. Verwende Startwerte.");
+        }
+    } catch (e) {
+        console.error("Fehler im loadFromSupabase Lifecycle:", e);
+    }
+}
+
 async function saveToSupabase() {
+    if (!supabase) return;
     const isoTimestamp = new Date().toISOString();
+    console.log("Speichere aktuelle Werte in Supabase...");
 
     for (let id in districts) {
         let db = districts[id];
@@ -466,15 +521,7 @@ function updateSystem(){
 
                 let intenseThreshold = 0.02; 
 
-                if (id === "102") {
-                    if (currentHour >= 12 && currentHour < 18) {
-                        intenseThreshold = 0.05; 
-                    } else if ((currentHour >= 18 && currentHour < 23) || (currentHour >= 6 && currentHour < 12)) {
-                        intenseThreshold = 0.03; 
-                    } else {
-                        intenseThreshold = 0.008; 
-                    }
-                } else if (id === "103") {
+                if (id === "102" || id === "103") {
                     if (currentHour >= 12 && currentHour < 18) {
                         intenseThreshold = 0.05; 
                     } else if ((currentHour >= 18 && currentHour < 23) || (currentHour >= 6 && currentHour < 12)) {
@@ -550,11 +597,7 @@ function updateSystem(){
                     }
                 } 
                 else {
-                    if (db.targetUsers < 1500 || db.targetUsers > 3500 || Math.random() < 0.1) {
-                        var targetNacht = 1500 + Math.random() * 2000;
-                    } else {
-                        var targetNacht = db.targetUsers;
-                    }
+                    let targetNacht = (db.targetUsers < 1500 || db.targetUsers > 3500 || Math.random() < 0.1) ? (1500 + Math.random() * 2000) : db.targetUsers;
                     targetTag = targetNacht;
                 }
             } 
@@ -578,11 +621,7 @@ function updateSystem(){
                     }
                 } 
                 else {
-                    if (db.targetUsers < 1500 || db.targetUsers > 3500 || Math.random() < 0.1) {
-                        var targetNacht = 1500 + Math.random() * 2000;
-                    } else {
-                        var targetNacht = db.targetUsers;
-                    }
+                    let targetNacht = (db.targetUsers < 1500 || db.targetUsers > 3500 || Math.random() < 0.1) ? (1500 + Math.random() * 2000) : db.targetUsers;
                     targetTag = targetNacht;
                 }
             } 
@@ -617,11 +656,7 @@ function updateSystem(){
                 if (id === "102" || id === "103") {
                     db.targetUsers = targetTag; 
                 } else {
-                    if (db.targetUsers < 1500 || db.targetUsers > 3500 || Math.random() < 0.1) {
-                        var targetNacht = 1500 + Math.random() * 2000;
-                    } else {
-                        var targetNacht = db.targetUsers;
-                    }
+                    let targetNacht = (db.targetUsers < 1500 || db.targetUsers > 3500 || Math.random() < 0.1) ? (1500 + Math.random() * 2000) : db.targetUsers;
                     db.targetUsers = (targetTag * db.transitionFactor) + (targetNacht * (1.0 - db.transitionFactor));
                 }
             }
@@ -788,9 +823,8 @@ function updateSystem(){
         drawChart("damageChart_" + id, db.damageHistory, false, 100);
     }
 
-    // Erhöhe den globalen Interval-Counter
+    // Intervall-Zähler: speichert alle 5 Sekunden in die Cloud
     dbUpdateCounter++;
-    // Führe alle 5 Sekunden das Supabase-Update aus
     if (dbUpdateCounter >= 5) {
         saveToSupabase();
         dbUpdateCounter = 0;
@@ -804,19 +838,16 @@ function getDamageColor(damageValue) {
     let r = 0, g = 0, b = 0;
     
     if (damageValue <= 50) {
-        // Übergang von Grün (0, 255, 136) zu Knallgelb (255, 217, 59)
         let factor = damageValue / 50;
         r = Math.round(0 + (255 - 0) * factor);
         g = Math.round(255 + (217 - 255) * factor);
         b = Math.round(136 + (59 - 136) * factor);
     } else if (damageValue <= 75) {
-        // Übergang von Knallgelb (255, 217, 59) zu Orange (255, 120, 0)
         let factor = (damageValue - 50) / 25;
         r = 255;
         g = Math.round(217 + (120 - 217) * factor);
         b = Math.round(59 + (0 - 59) * factor);
     } else {
-        // Übergang von Orange (255, 120, 0) zu Knallrot (255, 77, 77)
         let factor = (damageValue - 75) / 25;
         r = 255;
         g = Math.round(120 + (77 - 120) * factor);
@@ -887,7 +918,6 @@ function drawChart(id, data, isUserChart, maxLimitSpec){
             else if(value > 60){ ctx.strokeStyle = "#ffd93b"; }
             else{ ctx.strokeStyle = "#00ff88"; }
         } else if(id.startsWith("damageChart_")) {
-            // Farbverlauf für das Systemschaden-Feld basierend auf dem aktuellen Wert
             ctx.strokeStyle = getDamageColor(value);
         } else {
             if(value > 90){ ctx.strokeStyle = "#ff4d4d"; }
@@ -939,10 +969,15 @@ function drawChart(id, data, isUserChart, maxLimitSpec){
 }
 
 // ====================================
-// START
+// LIFECYCLE INITIALISIERUNG
 // ====================================
-updateClockAndTotals();
-setInterval(updateSystem, 1000);
+document.addEventListener("DOMContentLoaded", async () => {
+    updateClockAndTotals();
+    // 1. Letzte Werte aus Supabase laden
+    await loadFromSupabase();
+    // 2. Loop starten (alle 1 Sekunde)
+    setInterval(updateSystem, 1000);
+});
 
 </script>
 
